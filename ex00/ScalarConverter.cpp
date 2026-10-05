@@ -1,6 +1,9 @@
 #include "./ScalarConverter.hpp"
 #include <string>
 #include <iostream>
+#include <cctype>
+#include <cstdlib>
+#include <sstream>
 /*
 Write a class ScalarConverter that will contain only one static method "convert"
 that will take as a parameter a string representation of a C++ literal in its most common
@@ -35,16 +38,109 @@ int: 42
 float: 42.0f
 double: 42.0
 */
+
+/*
+Authorized: Any function to convert from a string to an int, a float, or a
+double.
+*/
+
+// Examples of char literals : ’c’, ’a’, ...
+// Examples of int literals: 0, -42, 42...
+// Examples of float literals: 0.0f, -4.2f, 4.2f...
+// Examples of double literals: 0.0, -4.2, 4.2...
+enum types
+{
+    CHAR = 0,
+    INT = 1,
+    FLOAT = 2,
+    DOUBLE = 3,
+    UNKNOWN_TYPE = 4
+};
+
+types detect_type(std::string str)
+{
+    std::stringstream ss;
+    ss << str;
+    int i = 0;
+    float f = 0;
+    double d = 0;
+    char suffix;
+    if (str.length() == 1 && std::isdigit((str[0])))
+        return CHAR;
+    else if (ss >> i && ss.eof())
+        return INT;
+    else if (ss >> f && ss >> suffix && (suffix == 'f' || suffix == 'F') && ss.eof())
+        return FLOAT;
+    else if (ss >> d && ss.eof())
+        return DOUBLE;
+    else
+        return UNKNOWN_TYPE;
+}
+/*
+Except for char parameters, only the decimal notation will be used.
+non-displayable characters shouldn’t be used as
+inputs. If a conversion to char is not displayable, print an informative message.
+*/
+void display_char(std::string str)
+{
+    char c = str[0];
+    if (c > 20 && c < 127)
+        std::cout << "char : " << static_cast<char>(c) << std::endl;
+    else
+        std::cout << "char :  Non displayable" << std::endl;
+    std::cout << "int : " << static_cast<int>(c) << std::endl;
+    std::cout << "float : " << static_cast<float>(c) << std::endl;
+    std::cout << "douvle : " << static_cast<double>(c) << std::endl;
+}
+
+void display_int(std::string str)
+{
+    int i = std::atoi(str.c_str());
+    std::cout << "char : " << static_cast<char>(i) << std::endl;
+    std::cout << "int : " << i << std::endl;
+    std::cout << "float : " << static_cast<float>(i) << std::endl;
+    std::cout << "double : " << static_cast<double>(i) << std::endl;
+}
+
+void display_float(std::string str)
+{
+    //-inff, +inff, nan
+    float f = static_cast<float>(std::atof(str.c_str()));
+    int i = static_cast<int>(f);
+    std::cout << "char : " << static_cast<char>(i) << std::endl;
+    std::cout << "int : " << i << std::endl;
+    std::cout << "float : " << f << "f" << std::endl;
+    std::cout << "double : " << static_cast<double>(i) << std::endl;
+}
+void display_double(std::string str)
+{
+    //-inf +inf nan
+    double d = std::atof(str.c_str());
+    int i = static_cast<int>(d);
+    std::cout << "char : " << static_cast<char>(i) << std::endl;
+    std::cout << "int : " << i << std::endl;
+    std::cout << "float : " << static_cast<float>(d) << "f" << std::endl;
+    std::cout << "double : " << static_cast<double>(i) << std::endl;
+}
 void ScalarConverter::convert(std::string str)
 {
-    int actual_type = detect_type(str);
-    actual_type a = convert2actualtype(str, actual_type);
-    std::cout << "char : " << static_cast<char>(a) << std::endl;
-    std::cout << "int : " << static_cast<int>(a) << std::endl;
-    std::cout << "float : " << static_cast<float>(a) << std::end;
-    std::cout << "douvle : " << static_cast<double>(a) << std::endl;
-}
-// parsing
-int detect_type(std::string str)
-{
+    types actual_type = detect_type(str);
+
+    switch (actual_type)
+    {
+    case CHAR:
+        display_char(str);
+        break;
+    case INT:
+        display_int(str);
+        break;
+    case FLOAT:
+        display_float(str);
+        break;
+    case DOUBLE:
+        display_double(str);
+        break;
+    case UNKNOWN_TYPE:
+        std::cout << "unknown type" << std::endl;
+    }
 }
