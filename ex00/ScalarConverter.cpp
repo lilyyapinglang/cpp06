@@ -4,6 +4,7 @@
 #include <cctype>
 #include <cstdlib>
 #include <sstream>
+#include <iomanip>
 /*
 Write a class ScalarConverter that will contain only one static method "convert"
 that will take as a parameter a string representation of a C++ literal in its most common
@@ -62,19 +63,23 @@ types detect_type(std::string str)
     std::stringstream ss;
     ss << str;
     int i = 0;
-    float f = 0;
-    double d = 0;
+    float f = 0.0f;
+    double d = 0.0;
     char suffix;
-    if (str.length() == 1 && std::isdigit((str[0])))
+    if (str.length() == 1 && !std::isdigit((str[0])))
         return CHAR;
-    else if (ss >> i && ss.eof())
-        return INT;
-    else if (ss >> f && ss >> suffix && (suffix == 'f' || suffix == 'F') && ss.eof())
+    if (ss >> f && ss >> suffix && (suffix == 'f' || suffix == 'F') && ss >> std::ws && ss.eof())
         return FLOAT;
-    else if (ss >> d && ss.eof())
+    if (ss >> d && ss.eof())
         return DOUBLE;
-    else
-        return UNKNOWN_TYPE;
+    if (ss >> i && ss.eof())
+        return INT;
+
+    ss.str("");
+    ss.clear();
+    ss << str;
+
+    return UNKNOWN_TYPE;
 }
 /*
 Except for char parameters, only the decimal notation will be used.
@@ -83,44 +88,60 @@ inputs. If a conversion to char is not displayable, print an informative message
 */
 void display_char(std::string str)
 {
+    std::cout << "in display char " << std::endl;
+
     char c = str[0];
-    if (c > 20 && c < 127)
-        std::cout << "char : " << static_cast<char>(c) << std::endl;
+    if (c > 31 && c < 127)
+        std::cout << "char: " << static_cast<char>(c) << std::endl;
     else
-        std::cout << "char :  Non displayable" << std::endl;
-    std::cout << "int : " << static_cast<int>(c) << std::endl;
-    std::cout << "float : " << static_cast<float>(c) << std::endl;
-    std::cout << "douvle : " << static_cast<double>(c) << std::endl;
+        std::cout << "char:  Non displayable" << std::endl;
+    std::cout << "int: " << static_cast<int>(c) << std::endl;
+    std::cout << "float: " << static_cast<float>(c) << std::endl;
+    std::cout << "double: " << static_cast<double>(c) << std::endl;
 }
 
 void display_int(std::string str)
 {
+    std::cout << "in display int " << std::endl;
     int i = std::atoi(str.c_str());
-    std::cout << "char : " << static_cast<char>(i) << std::endl;
-    std::cout << "int : " << i << std::endl;
-    std::cout << "float : " << static_cast<float>(i) << std::endl;
-    std::cout << "double : " << static_cast<double>(i) << std::endl;
+    float f = static_cast<float>(i);
+    if (i > 31 && i < 127)
+        std::cout
+            << "char: " << static_cast<char>(i) << std::endl;
+    else
+        std::cout << "char: Non displayable" << std::endl;
+    std::cout << "int: " << i << std::endl;
+    std::cout << std::fixed << std::setprecision(1);
+
+    std::cout << "float: " << f << "f" << std::endl;
+    std::cout << "double: " << static_cast<double>(i) << std::endl;
 }
 
 void display_float(std::string str)
 {
+    //  std::cout << "in display float " << std::endl;
+
     //-inff, +inff, nan
     float f = static_cast<float>(std::atof(str.c_str()));
     int i = static_cast<int>(f);
-    std::cout << "char : " << static_cast<char>(i) << std::endl;
-    std::cout << "int : " << i << std::endl;
-    std::cout << "float : " << f << "f" << std::endl;
-    std::cout << "double : " << static_cast<double>(i) << std::endl;
+    std::cout << "char: " << "\'" << static_cast<char>(i) << "\'" << std::endl;
+    std::cout << "int: " << i << std::endl;
+
+    std::cout << "float: " << str << std::endl;
+    std::cout << "double: " << str.substr(0, str.size() - 1) << std::endl;
 }
 void display_double(std::string str)
 {
+    std::cout << "in display double " << std::endl;
+
     //-inf +inf nan
     double d = std::atof(str.c_str());
     int i = static_cast<int>(d);
-    std::cout << "char : " << static_cast<char>(i) << std::endl;
-    std::cout << "int : " << i << std::endl;
-    std::cout << "float : " << static_cast<float>(d) << "f" << std::endl;
-    std::cout << "double : " << static_cast<double>(i) << std::endl;
+    std::cout << "char: " << static_cast<char>(i) << std::endl;
+    std::cout << "int: " << i << std::endl;
+    std::cout << std::fixed << std::setprecision(1);
+    std::cout << "float: " << static_cast<float>(d) << "f" << std::endl;
+    std::cout << "double: " << static_cast<double>(i) << std::endl;
 }
 void ScalarConverter::convert(std::string str)
 {

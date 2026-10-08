@@ -1,11 +1,12 @@
 #include "./ScalarConverter.hpp"
 #include <string>
 #include <iostream>
+
 int main(int ac, char *av[])
 {
     (void)ac;
     std::string a = av[1];
-    std::cout << "entered args is " << a << std::endl;
+    // std::cout << "entered args is " << a << std::endl;
     ScalarConverter::convert(a);
 }
 
