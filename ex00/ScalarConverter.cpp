@@ -1,54 +1,13 @@
 #include "./ScalarConverter.hpp"
-#include <string>
 #include <iostream>
-#include <cctype>
-#include <cstdlib>
-#include <sstream>
 #include <iomanip>
-/*
-Write a class ScalarConverter that will contain only one static method "convert"
-that will take as a parameter a string representation of a C++ literal in its most common
-form and output its value in the following series of scalar types:
-• char
-• int
-• float
-• double
-*/
+#include <sstream>
+#include <cstdlib>
+#include <cctype>
+#include <climits>
+#include <cfloat>
+#include <limits>
 
-/*
-You have to first detect the type of the literal passed as a parameter,
-convert it from string to its actual type,
-then convert it explicitly to the three other data types.
-Lastly, display the results as shown below.
-*/
-
-/*
-./convert 0
-char: Non displayable
-int: 0
-float: 0.0f
-double: 0.0
-./convert nan
-char: impossible
-int: impossible
-float: nanf
-double: nan
-./convert 42.0f
-char: '*'
-int: 42
-float: 42.0f
-double: 42.0
-*/
-
-/*
-Authorized: Any function to convert from a string to an int, a float, or a
-double.
-*/
-
-// Examples of char literals : ’c’, ’a’, ...
-// Examples of int literals: 0, -42, 42...
-// Examples of float literals: 0.0f, -4.2f, 4.2f...
-// Examples of double literals: 0.0, -4.2, 4.2...
 enum types
 {
     CHAR = 0,
@@ -58,110 +17,184 @@ enum types
     UNKNOWN_TYPE = 4
 };
 
-types detect_type(std::string str)
+static bool is_pseudo_literal(const std::string &str)
 {
-    std::stringstream ss;
-    ss << str;
-    int i = 0;
-    float f = 0.0f;
-    double d = 0.0;
-    char suffix;
-    if (str.length() == 1 && !std::isdigit((str[0])))
+    return (str == "nan" || str == "nanf" ||
+        str == "+inf" || str == "-inf" || str == "inf" ||
+        str == "+inff" || str == "-inff" || str == "inff");
+}
+
+static bool is_int_literal(const std::string &str)
+{
+    if (str.empty())
+        return false;
+    std::size_t i = 0;
+    if (str[i] == '+' || str[i] == '-')
+        i++;
+    if (i == str.size())
+        return false;
+    while (i < str.size())
+    {
+        if (!std::isdigit(static_cast<unsigned char>(str[i])))
+            return false;
+        i++;
+    }
+    return true;
+}
+
+static bool parse_full_double(const std::string &str, double &value)
+{
+    char *endptr = NULL;
+    value = std::strtod(str.c_str(), &endptr);
+    return (endptr != str.c_str() && *endptr == '\0');
+}
+
+static bool is_double_literal(const std::string &str)
+{
+    if (str.empty())
+        return false;
+    if (is_pseudo_literal(str))
+        return true;
+    if (str.find('.') == std::string::npos &&
+        str.find('e') == std::string::npos &&
+        str.find('E') == std::string::npos)
+        return false;
+    double value;
+    return parse_full_double(str, value);
+}
+
+static bool is_float_literal(const std::string &str)
+{
+    if (str.size() < 2)
+        return false;
+    if (str[str.size() - 1] != 'f' && str[str.size() - 1] != 'F')
+        return false;
+
+    std::string base = str.substr(0, str.size() - 1);
+    if (base == "nan" || base == "+inf" || base == "-inf" || base == "inf")
+        return true;
+
+    if (base.find('.') == std::string::npos &&
+        base.find('e') == std::string::npos &&
+        base.find('E') == std::string::npos)
+        return false;
+
+    double value;
+    return parse_full_double(base, value);
+}
+
+static types detect_type(const std::string &str)
+{
+    if (str.size() == 1 && !std::isdigit(static_cast<unsigned char>(str[0])))
         return CHAR;
-    if (ss >> f && ss >> suffix && (suffix == 'f' || suffix == 'F') && ss >> std::ws && ss.eof())
-        return FLOAT;
-    if (ss >> d && ss.eof())
-        return DOUBLE;
-    if (ss >> i && ss.eof())
+    if (is_int_literal(str))
         return INT;
-
-    ss.str("");
-    ss.clear();
-    ss << str;
-
+    if (is_float_literal(str))
+        return FLOAT;
+    if (is_double_literal(str))
+        return DOUBLE;
     return UNKNOWN_TYPE;
 }
-/*
-Except for char parameters, only the decimal notation will be used.
-non-displayable characters shouldn’t be used as
-inputs. If a conversion to char is not displayable, print an informative message.
-*/
-void display_char(std::string str)
-{
-    std::cout << "in display char " << std::endl;
 
-    char c = str[0];
-    if (c > 31 && c < 127)
-        std::cout << "char: " << static_cast<char>(c) << std::endl;
-    else
-        std::cout << "char:  Non displayable" << std::endl;
-    std::cout << "int: " << static_cast<int>(c) << std::endl;
-    std::cout << "float: " << static_cast<float>(c) << std::endl;
-    std::cout << "double: " << static_cast<double>(c) << std::endl;
+static bool is_nan(double value)
+{
+    return value != value;
 }
 
-void display_int(std::string str)
+static bool is_inf(double value)
 {
-    std::cout << "in display int " << std::endl;
-    int i = std::atoi(str.c_str());
-    float f = static_cast<float>(i);
-    if (i > 31 && i < 127)
-        std::cout
-            << "char: " << static_cast<char>(i) << std::endl;
+    const double max = std::numeric_limits<double>::max();
+    return (value > max || value < -max);
+}
+
+static void print_char(double value)
+{
+    if (is_nan(value) || is_inf(value) || value < 0.0 || value > 127.0 ||
+        value != static_cast<double>(static_cast<int>(value)))
+    {
+        std::cout << "char: impossible" << std::endl;
+        return;
+    }
+    int int_value = static_cast<int>(value);
+    char c = static_cast<char>(int_value);
+    if (int_value >= 32 && int_value <= 126)
+        std::cout << "char: '" << c << "'" << std::endl;
     else
         std::cout << "char: Non displayable" << std::endl;
-    std::cout << "int: " << i << std::endl;
-    std::cout << std::fixed << std::setprecision(1);
-
-    std::cout << "float: " << f << "f" << std::endl;
-    std::cout << "double: " << static_cast<double>(i) << std::endl;
 }
 
-void display_float(std::string str)
+static void print_int(double value)
 {
-    //  std::cout << "in display float " << std::endl;
-
-    //-inff, +inff, nan
-    float f = static_cast<float>(std::atof(str.c_str()));
-    int i = static_cast<int>(f);
-    std::cout << "char: " << "\'" << static_cast<char>(i) << "\'" << std::endl;
-    std::cout << "int: " << i << std::endl;
-
-    std::cout << "float: " << str << std::endl;
-    std::cout << "double: " << str.substr(0, str.size() - 1) << std::endl;
+    if (is_nan(value) || is_inf(value) || value < static_cast<double>(INT_MIN) || value > static_cast<double>(INT_MAX))
+    {
+        std::cout << "int: impossible" << std::endl;
+        return;
+    }
+    std::cout << "int: " << static_cast<int>(value) << std::endl;
 }
-void display_double(std::string str)
+
+static void print_float(double value)
 {
-    std::cout << "in display double " << std::endl;
-
-    //-inf +inf nan
-    double d = std::atof(str.c_str());
-    int i = static_cast<int>(d);
-    std::cout << "char: " << static_cast<char>(i) << std::endl;
-    std::cout << "int: " << i << std::endl;
-    std::cout << std::fixed << std::setprecision(1);
-    std::cout << "float: " << static_cast<float>(d) << "f" << std::endl;
-    std::cout << "double: " << static_cast<double>(i) << std::endl;
+    if (is_nan(value))
+    {
+        std::cout << "float: nanf" << std::endl;
+        return;
+    }
+    if (is_inf(value))
+    {
+        if (value < 0)
+            std::cout << "float: -inff" << std::endl;
+        else
+            std::cout << "float: inff" << std::endl;
+        return;
+    }
+    std::cout << std::fixed << std::setprecision(1)
+        << "float: " << static_cast<float>(value) << "f" << std::endl;
 }
+
+static void print_double(double value)
+{
+    if (is_nan(value))
+    {
+        std::cout << "double: nan" << std::endl;
+        return;
+    }
+    if (is_inf(value))
+    {
+        if (value < 0)
+            std::cout << "double: -inf" << std::endl;
+        else
+            std::cout << "double: inf" << std::endl;
+        return;
+    }
+    std::cout << std::fixed << std::setprecision(1)
+        << "double: " << value << std::endl;
+}
+
+static double to_double(const std::string &str, types type)
+{
+    if (type == CHAR)
+        return static_cast<double>(static_cast<unsigned char>(str[0]));
+    if (type == FLOAT)
+        return std::strtod(str.substr(0, str.size() - 1).c_str(), NULL);
+    return std::strtod(str.c_str(), NULL);
+}
+
 void ScalarConverter::convert(std::string str)
 {
-    types actual_type = detect_type(str);
-
-    switch (actual_type)
+    types type = detect_type(str);
+    if (type == UNKNOWN_TYPE)
     {
-    case CHAR:
-        display_char(str);
-        break;
-    case INT:
-        display_int(str);
-        break;
-    case FLOAT:
-        display_float(str);
-        break;
-    case DOUBLE:
-        display_double(str);
-        break;
-    case UNKNOWN_TYPE:
-        std::cout << "unknown type" << std::endl;
+        std::cout << "char: impossible" << std::endl;
+        std::cout << "int: impossible" << std::endl;
+        std::cout << "float: impossible" << std::endl;
+        std::cout << "double: impossible" << std::endl;
+        return;
     }
+
+    double value = to_double(str, type);
+    print_char(value);
+    print_int(value);
+    print_float(value);
+    print_double(value);
 }
