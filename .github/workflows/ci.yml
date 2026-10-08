@@ -8,54 +8,58 @@ on:
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-latest
+    # Pinning to ubuntu-24.04 to avoid the unreleased ubuntu-latest migration warning
+    runs-on: ubuntu-24.04
 
     steps:
-    # Step 1: Check out the repository code
+    # Upgraded checkout action to v4 with explicit node setup if needed, but v4 is safe.
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    # Step 2: Install compiler and tools
     - name: Install Build Dependencies
       run: |
         sudo apt-get update
         sudo apt-get install -y build-essential python3
 
-    # Step 3: Build and test each exercise directory
     - name: Compile and Test Exercises
       run: |
-        # Define the exercise directories to test
         EXERCISES=("ex00" "ex01" "ex02")
         
         for ex in "${EXERCISES[@]}"; do
           if [ -d "$ex" ]; then
             echo "========================================"
-            echo "Processing $ex..."
+            echo "Starting: $ex"
             echo "========================================"
             cd "$ex"
             
-            # 1. Clean previous build files if any exist
+            # Clean previous builds safely
             if grep -q "fclean" Makefile 2>/dev/null; then
               make fclean
             else
               make clean || true
             fi
             
-            # 2. Compile the project
-            echo "Compiling..."
-            make
-            
-            # 3. Run Python test script if it exists
-            if [ -f "test.py" ]; then
-              echo "Running tests..."
-              python3 test.py
-            else
-              echo "No test.py found for $ex, skipping tests."
+            # Compile and catch compilation failure
+            echo "Compiling $ex..."
+            if ! make; then
+              echo "❌ ERROR: Compilation failed in $ex"
+              exit 1
             fi
             
-            # Go back to the root directory before the next iteration
+            # Run test script if it exists and catch test failure
+            if [ -f "test.py" ]; then
+              echo "Running tests for $ex..."
+              if ! python3 test.py; then
+                echo "❌ ERROR: test.py failed in $ex"
+                exit 1
+              fi
+            else
+              echo "No test.py found for $ex, skipping."
+            fi
+            
             cd ..
           else
             echo "Directory $ex not found, skipping."
           fi
         done
+        echo "✅ All exercises compiled and passed successfully!"
