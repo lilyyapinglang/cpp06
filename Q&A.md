@@ -135,3 +135,13 @@ numeric_limits<int>::min()
 numeric_limits<float>::max() 
 ```
 
+17. commit message conventions 
+
+• feat: Adds a new feature to the application or library (correlates to a MINOR version bump).
+• fix: Resolves a bug in the codebase (correlates to a PATCH version bump).
+• refactor: Rewrites or restructures code without changing its external behavior.
+• perf: Improves performance.
+• docs: Updates documentation only.
+• style: Changes code formatting, whitespace, or missing semi-colons (does not affect logic).
+• test: Adds or corrects tests.
+• chore: Updates build tasks, package dependencies, or auxiliary tools.
