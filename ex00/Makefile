@@ -25,4 +25,7 @@ fclean: clean
 
 re: fclean all
 
+test: re
+	python test.py
+
 .PHONY: all clean fclean re

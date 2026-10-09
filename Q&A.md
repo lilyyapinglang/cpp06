@@ -117,3 +117,21 @@ double: 97
     3. To make `eof()` flip to 1, you have to force the stream to look past the 'f'. You can do this by telling it to peek or consume any remaining whitespace (even if there is none).
     4.  to allow trailling space while still rejecting actual trailling data, use `ss>>std::ws` (which consumes whitespace up to the EOF) right before checking eof()
     5.  `std::ws` is a manipulator that discards whitespace
+16. int range vs float range vs double range
+
+| type | range | bits| range formula|
+|------|-------|-----|-------|
+|char | 0-255| 8 bits| 2^8-1|
+| int  |-2147483648 to +2147483647 | 32 bits| 2^32-1|
+|float | 3.4 x 10-38 to 3.4 x 10+38.|32 bits| 2^32 -1|
+|double| 1.7x10-308 to 1.7x10+308| 64 bits| 2^64-1|
+
+![float and doule bits](image.png)
+![data types](image-1.png)
+
+```
+#include <limits> 
+numeric_limits<int>::min()
+numeric_limits<float>::max() 
+```
+

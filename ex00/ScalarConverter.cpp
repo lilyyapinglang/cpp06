@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <sstream>
 #include <iomanip>
+#include <limits>
 /*
 Write a class ScalarConverter that will contain only one static method "convert"
 that will take as a parameter a string representation of a C++ literal in its most common
@@ -68,17 +69,17 @@ types detect_type(std::string str)
     char suffix;
     if (str.length() == 1 && !std::isdigit((str[0])))
         return CHAR;
-    if (ss >> f && ss >> suffix && (suffix == 'f' || suffix == 'F') && ss >> std::ws && ss.eof())
-        return FLOAT;
-    if (ss >> d && ss.eof())
-        return DOUBLE;
+    // get the interger part
     if (ss >> i && ss.eof())
         return INT;
-
-    ss.str("");
     ss.clear();
-    ss << str;
-
+    ss.seekg(0, std::ios::beg);
+    if ((ss >> f && ss >> suffix && (suffix == 'f' || suffix == 'F') && ss >> std::ws && ss.eof()) || str == "nanf" || str == "+inff" || str == "-inff")
+        return FLOAT;
+    ss.clear();
+    ss.seekg(0, std::ios::beg);
+    if ((ss >> d && ss.eof()) || str == "nan" || str == "+inf" || str == "-inf")
+        return DOUBLE;
     return UNKNOWN_TYPE;
 }
 /*
@@ -88,28 +89,30 @@ inputs. If a conversion to char is not displayable, print an informative message
 */
 void display_char(std::string str)
 {
-    std::cout << "in display char " << std::endl;
+    // std::cout << "in display char " << std::endl;
 
-    char c = str[0];
+    int c = str[0];
     if (c > 31 && c < 127)
-        std::cout << "char: " << static_cast<char>(c) << std::endl;
+        std::cout << "char: " << "\'" << static_cast<char>(c) << "\'" << std::endl;
     else
         std::cout << "char:  Non displayable" << std::endl;
     std::cout << "int: " << static_cast<int>(c) << std::endl;
-    std::cout << "float: " << static_cast<float>(c) << std::endl;
-    std::cout << "double: " << static_cast<double>(c) << std::endl;
+    std::cout << "float: " << std::fixed << std::setprecision(1) << static_cast<float>(c) << "f" << std::endl;
+    std::cout << "double: " << std::fixed << std::setprecision(1) << static_cast<double>(c) << std::endl;
 }
 
 void display_int(std::string str)
 {
-    std::cout << "in display int " << std::endl;
+    // std::cout << "in display int " << std::endl;
     int i = std::atoi(str.c_str());
     float f = static_cast<float>(i);
     if (i > 31 && i < 127)
         std::cout
             << "char: " << static_cast<char>(i) << std::endl;
-    else
+    else if (i >= 0 && i < 128)
         std::cout << "char: Non displayable" << std::endl;
+    else
+        std::cout << "char: impossible" << std::endl;
     std::cout << "int: " << i << std::endl;
     std::cout << std::fixed << std::setprecision(1);
 
@@ -119,29 +122,86 @@ void display_int(std::string str)
 
 void display_float(std::string str)
 {
-    //  std::cout << "in display float " << std::endl;
+    // std::cout << "in display float " << std::endl;
 
-    //-inff, +inff, nan
-    float f = static_cast<float>(std::atof(str.c_str()));
-    int i = static_cast<int>(f);
-    std::cout << "char: " << "\'" << static_cast<char>(i) << "\'" << std::endl;
-    std::cout << "int: " << i << std::endl;
-
-    std::cout << "float: " << str << std::endl;
-    std::cout << "double: " << str.substr(0, str.size() - 1) << std::endl;
+    //-inff, +inff, nanf
+    if (str == "-inff" || str == "+inff" || str == "nanf")
+    {
+        std::cout << "char: impossible" << std::endl;
+        std::cout << "int: impossible" << std::endl;
+        if (str == "+inff")
+            str.erase(0, 1);
+        std::cout << "float: " << str << std::endl;
+        std::cout << "double: " << str.substr(0, str.size() - 1) << std::endl;
+    }
+    else
+    {
+        float f = static_cast<float>(std::atof(str.c_str()));
+        // std::cout << f << std::endl;
+        //  test if after a are all 0
+        int i = static_cast<int>(f);
+        if (f == i)
+        {
+            std::cout << "char: " << "\'" << static_cast<char>(i) << "\'" << std::endl;
+            std::cout << std::fixed << std::setprecision(1);
+        }
+        else
+            std::cout << "char: impossible" << std::endl;
+        std::cout << "int: " << i << std::endl;
+        std::cout << "float: " << f << "f" << std::endl;
+        std::cout << "double: " << f << std::endl;
+    }
 }
+
 void display_double(std::string str)
 {
-    std::cout << "in display double " << std::endl;
+    // std::cout << "in display double " << std::endl;
 
     //-inf +inf nan
-    double d = std::atof(str.c_str());
-    int i = static_cast<int>(d);
-    std::cout << "char: " << static_cast<char>(i) << std::endl;
-    std::cout << "int: " << i << std::endl;
-    std::cout << std::fixed << std::setprecision(1);
-    std::cout << "float: " << static_cast<float>(d) << "f" << std::endl;
-    std::cout << "double: " << static_cast<double>(i) << std::endl;
+    if (str == "-inf" || str == "+inf" || str == "nan")
+    {
+        std::cout << "char: impossible" << std::endl;
+        std::cout << "int: impossible" << std::endl;
+        if (str == "+inf")
+            str.erase(0, 1);
+        std::cout
+            << "float: " << str << "f" << std::endl;
+        std::cout << "double: " << str << std::endl;
+    }
+    else
+    {
+        double d = std::atof(str.c_str());
+        bool int_withinrage = d >= std::numeric_limits<int>::min() && d <= std::numeric_limits<int>::max();
+
+        if (int_withinrage)
+        {
+            int i = static_cast<int>(d);
+            if (i > 31 && i < 127)
+                std::cout
+                    << "char: " << static_cast<char>(i) << std::endl;
+            else if (i >= 0 && i < 128)
+                std::cout << "char: Non displayable" << std::endl;
+            else
+                std::cout << "char: impossible" << std::endl;
+            std::cout << "int: " << i << std::endl;
+        }
+        else
+        {
+            std::cout << "char: impossible" << std::endl;
+            std::cout << "int: impossible" << std::endl;
+        }
+        std::cout << std::fixed << std::setprecision(1);
+        std::cout << "float: " << static_cast<float>(d) << "f" << std::endl;
+        std::cout << "double: " << d << std::endl;
+    }
+}
+
+void display_unknown()
+{
+    std::cout << "char: impossible" << std::endl;
+    std::cout << "int: impossible" << std::endl;
+    std::cout << "float: impossible" << std::endl;
+    std::cout << "double: impossible" << std::endl;
 }
 void ScalarConverter::convert(std::string str)
 {
@@ -162,6 +222,6 @@ void ScalarConverter::convert(std::string str)
         display_double(str);
         break;
     case UNKNOWN_TYPE:
-        std::cout << "unknown type" << std::endl;
+        display_unknown();
     }
 }
