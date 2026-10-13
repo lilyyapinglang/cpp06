@@ -1,7 +1,7 @@
 #include "Data.hpp"
 #include "iostream"
 
-Data::Data(int age) : age(age)
+Data::Data(std::string, int age) : age(age), name(name)
 {
 	std::cout << "Data constructor called" << std::endl;
 }
@@ -19,11 +19,16 @@ Data &Data::operator=(Data &other)
 	return (*this);
 }
 
-Data ::~Data()
+Data::~Data()
 {
 	std::cout << "Data destructor called" << std::endl;
 }
 
-int Data::getAge() const{
-    return this->age;
+int Data::getAge() const
+{
+	return this->age;
+}
+
+std::string Data::getName() const{
+	return this->name;
 }

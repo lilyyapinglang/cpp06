@@ -1,0 +1,8 @@
+1. what is serialization ? 
+In c++ , **serilization** is the process of converting an **object** into a **sequence of bytes** so that it can be stored in memory or transmitted across a network.
+**Deserialization** is the reverse process, where the byte stream is used to reconstruct the original object.
+
+2. why do we need serialization?
+Serialization is needed when we need to store the state of the structure data such as classes and structs in c++.
+
+3. how to do serailiaztion with fstream and custom functions?

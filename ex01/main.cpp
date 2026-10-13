@@ -8,6 +8,6 @@ int	main(void)
 	uintptr_t ptr = Serializer::serialize(a);
 
 	Data *b = Serializer::deserialize(ptr);
-    if(a->getAge()==b->getAge())
+    if(a->getAge()==b->getAge() && a->getName() == b-> getName())
         std::cout <<"data is the same"<< std::endl;
     }
