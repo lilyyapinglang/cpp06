@@ -1,12 +1,11 @@
 #include "Data.hpp"
 #include "iostream"
 
-Data::Data(std::string, int age) : age(age), name(name)
+Data::Data(std::string name, int age):name(name), age(age)
 {
 	std::cout << "Data constructor called" << std::endl;
 }
-Data::Data(Data &other) : age(other.age)
-{
+Data::Data(Data &other) :name(other.name), age(other.age){
 	std::cout << "Data copy constructor called" << std::endl;
 }
 
@@ -14,6 +13,7 @@ Data &Data::operator=(Data &other)
 {
 	if (this != &other)
 	{
+		this->age = other.age;
 		this->age = other.age;
 	}
 	return (*this);

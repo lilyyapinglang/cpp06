@@ -1,5 +1,7 @@
 #ifndef DATA_HPP
 #define DATA_HPP
+#include<string>
+
 class Data
 {
 private:
@@ -7,7 +9,7 @@ private:
   int age;
 
 public:
-  Data(std::string name,int age);
+  Data(std::string name, int age);
   Data(Data &other);
   Data &operator=(Data &other);
   ~Data();

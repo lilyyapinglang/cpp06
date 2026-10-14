@@ -1,0 +1,7 @@
+1. what does public vistual destructors does ? 
+
+virtual destructors ensures that a derived cass object is deeted through a pointer or reference to the base calss, both the derived and base cass destructors execute in the proper order. 
+
+2. why it matters
+   1. polymorphic deletion: when you deete a derived object using a pointer typed as base cass. c++ needs to now which destructor to run first
+   2.  

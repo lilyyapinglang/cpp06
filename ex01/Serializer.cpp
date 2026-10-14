@@ -1,6 +1,6 @@
 #include "Serializer.hpp"
 #include <iostream>
-#include<fstream>
+#include <fstream>
 
 Serializer::Serializer()
 {
@@ -10,27 +10,41 @@ Serializer::~Serializer()
 {
     std::cout << "Serializer deconstrcutor called" <<std::endl;
 }
+
+// uintptr_t is an unsigned integer type that is guaranteed to be large enough to hold a pointer.
 uintptr_t Serializer::serialize(Data *ptr)
 {
-   ofstream MyWriteFile("data.bin");
+    //open for binary writing
+//    std::ofstream MyWriteFile("data.bin", std::ios::binary);
 
-    if(MyWriteFile.is_open())
-        std::cerr <<"Error opening file" << std::endl;
+//     if(!MyWriteFile.is_open())
+//     {
+//         std::cerr <<"Error opening file" << std::endl;
+//         return ;
+//     }
 
-    char* ch = reinterpret_cast<char*>(ptr);
-
-     MyFile.close();
-
-     return ch;
+//     char* ch = reinterpret_cast<char *>(ptr);
+//     MyWriteFile.write(ch, sizeof(Data));
+//      MyWriteFile.close();
+    uintptr_t p = reinterpret_cast<uintptr_t>(ptr);
+  
+    return p;
 }
 
 Data	*Serializer::deserialize(uintptr_t raw){
 
     Data *a;
-    ifstream MyReadFile("data.bin");
-    if(MyReadFile.isopen())
-        std::cerr <<"Error opening file" << std::endl;
-    MyReadFile.read(0, sizeof(&a));
+    // std::ifstream MyReadFile("data.bin",std::ios::binary);
+    // if(!MyReadFile.is_open())
+    // {
+    //     std::cerr <<"Error opening file" << std::endl;
+    //     return ;
+    // }
+    // char* ch = reinterpret_cast<char *>(raw);
+    // MyReadFile.read(ch, sizeof(&a));
+    
+    // MyReadFile.close();
     a=  reinterpret_cast<Data*>(raw);
+   
     return a;
 }

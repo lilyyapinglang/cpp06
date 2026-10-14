@@ -6,3 +6,21 @@ In c++ , **serilization** is the process of converting an **object** into a **se
 Serialization is needed when we need to store the state of the structure data such as classes and structs in c++.
 
 3. how to do serailiaztion with fstream and custom functions?
+
+
+
+4.  what is the difference between ofstream, fstream and ifstream?
+
+- `ofstream` class (output file stream) is used to write into files.
+- ofstream MyFile("filename.txt")
+- to write to a file
+  - `<<` inserion operator 
+    - MyFile << "Files can be tricky, but it is fun enough!";
+  - write(str,n) function
+    - writes n characters from the str into the fie
+    - MyFile.write(myStr, 5);
+5. what is reinterpret_cast ?
+
+
+6. what is uintptr_t?
+7. 
