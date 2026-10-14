@@ -34,17 +34,36 @@ Base	*generate(void)
 	case 2:
 		c = new C();
 		return (c);
-	}
+	default:
+		return NULL;
+	}	
 }
+
 /*
 It prints the actual type of the object pointed to by p: "A", "B", or "C".
+dynamic_cast safely converts a base class pointer to a derived class pointer at runtime. 
+If the cast succeeds, the pointer is valid; if it fails, it returns nullptr.
 */
 void	identify(Base *p){
-    
+	// try to cast to A
+	if(A *a_ptr= dynamic_cast<A *>(p))
+		std::cout<<"A " << a_ptr<< std::endl;
+	// try to cast to B
+	else if (B *b_ptr= dynamic_cast<B *>(p))
+		std::cout<<"B " <<b_ptr<<std::endl;
+	// try to cast to C
+	else if (C *c_ptr= dynamic_cast<C *>(p))
+		std::cout<<"C " <<c_ptr<<std::endl;
+	else 
+		std::cout <<"Unknown type." << std::endl;
 }
+
 /*
-It prints the actual type of the object referenced by p: "A", "B",
-	or "C". Using a pointer
+It prints the actual type of the object referenced by p: "A", "B", or "C". Using a pointer
 inside this function is forbidden.
 */
-void	identify(Base &p);
+void	identify(Base &p){
+	// p is an reference to a base type object 
+	Base *ptr = &p;
+	identify(ptr);
+}
