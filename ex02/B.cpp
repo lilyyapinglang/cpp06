@@ -3,6 +3,7 @@
 
 B::B()
 {
+    std::cout << "B constructor called" << std::endl;
 
 }
 

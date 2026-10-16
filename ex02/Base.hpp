@@ -4,7 +4,7 @@
 class Base
 {
   public:
-	virtual ~Base() = 0;
+	  virtual ~Base();
 };
 
 Base	*generate(void);
