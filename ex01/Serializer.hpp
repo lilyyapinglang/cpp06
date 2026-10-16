@@ -6,8 +6,10 @@
 #include <stdint.h>
 class Serializer
 {
-  public:
+private: 
 	Serializer();
+public:
+	
 	~Serializer();
 	/**
 	* @brief Serializes a Data pointer into a uintptr_t

@@ -11,6 +11,7 @@ Data::Data(Data &other) :name(other.name), age(other.age){
 
 Data &Data::operator=(Data &other)
 {
+	std::cout << "Data copy assignment operator called" << std::endl;
 	if (this != &other)
 	{
 		this->age = other.age;

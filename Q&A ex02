@@ -23,4 +23,7 @@ Serialization is needed when we need to store the state of the structure data su
 
 
 6. what is uintptr_t?
-7. 
+7. a static member function ?
+when a function inside a class is marked as `static`, it belongs to the class itself.  not to any individual object (instance) of that class.
+- no `this` pointer : a static does not look at or modify any specific object's data. it cannot access regular (non-static) variables or methods of the class.
+- Call without an object. no need to create an object using `new` or stack allocation to call it. call it directly with CLASSNAME::(scope resolution operator)
